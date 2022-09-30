@@ -1,7 +1,9 @@
 use crate::grid::Grid;
 
-mod grid;
+mod binary_tree;
 mod cell;
+mod grid;
+mod sidewinder;
 
 fn main() {
     println!("Hello, world!");
@@ -9,5 +11,9 @@ fn main() {
     grid.configure_cells();
 
     println!("{:?}", grid);
-    
+
+    // binary_tree::on(&mut grid);
+    sidewinder::on(&mut grid);
+
+    println!("{:?}", grid);
 }
