@@ -14,10 +14,10 @@ pub fn on(grid: &mut Grid) {
                 let cell_borrowed = cell.borrow();
 
                 if let Some(ref north) = cell_borrowed.north {
-                    neighbors.push(north.clone());
+                    neighbors.push(north.upgrade().unwrap().clone());
                 }
                 if let Some(ref east) = cell_borrowed.east {
-                    neighbors.push(east.clone());
+                    neighbors.push(east.upgrade().unwrap().clone());
                 }
             }
 

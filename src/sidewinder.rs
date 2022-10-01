@@ -19,12 +19,14 @@ pub fn on(grid: &mut Grid) {
             if should_close_out {
                 let member = run[rng.gen_range(0..run.len())].clone();
                 if member.borrow().north.is_some() {
-                    let cell2 = { member.borrow().north.clone().unwrap() };
+                    let cell2 = { 
+                        member.borrow().north.clone().upgrade().unwrap()
+                    };
                     link(member.clone(), cell2);
                     run.clear();
                 }
             } else {
-                let cell2: CellLink = { cell.borrow().east.clone().unwrap() };
+                let cell2: CellLink = { cell.borrow().east.clone().upgrade().unwrap() };
                 link(cell.clone(), cell2);
             }
         }

@@ -39,19 +39,19 @@ impl Grid {
                 let column = cell.column;
 
                 if row >= 1 {
-                    cell.north = self.get_cell(row - 1, column);
+                    cell.north = self.get_cell(row - 1, column).map(|v| v.downgrade());
                 }
 
                 if row < self.rows - 1 {
-                    cell.south = self.get_cell(row + 1, column);
+                    cell.south = self.get_cell(row + 1, column).map(|v| v.downgrade());
                 }
 
                 if column >= 1 {
-                    cell.west = self.get_cell(row, column - 1);
+                    cell.west = self.get_cell(row, column - 1).map(|v| v.downgrade());
                 }
 
                 if column < self.columns - 1 {
-                    cell.east = self.get_cell(row, column + 1);
+                    cell.east = self.get_cell(row, column + 1).map(|v| v.downgrade());
                 }
             }
         }
@@ -74,6 +74,7 @@ impl Grid {
                 let north = &cell.north;
                 match north {
                     Some(north) => {
+                        let north = north.upgrade().unwrap();
                         let north = north.borrow();
                         println!("north: row: {}, column: {}", north.row, north.column);
                     }
@@ -83,6 +84,7 @@ impl Grid {
                 let south = &cell.south;
                 match south {
                     Some(south) => {
+                        let south = south.upgrade().unwrap();
                         let south = south.borrow();
                         println!("south: row: {}, column: {}", south.row, south.column);
                     }
@@ -92,6 +94,7 @@ impl Grid {
                 let east = &cell.east;
                 match east {
                     Some(east) => {
+                        let east = east.upgrade().unwrap();
                         let east = east.borrow();
                         println!("east: row: {}, column: {}", east.row, east.column);
                     }
@@ -101,6 +104,7 @@ impl Grid {
                 let west = &cell.west;
                 match west {
                     Some(west) => {
+                        let west = west.upgrade().unwrap();
                         let west = west.borrow();
                         println!("west: row: {}, column: {}", west.row, west.column);
                     }
@@ -138,7 +142,7 @@ impl Debug for Grid {
                 top_str.push_str("   ");
                 match cell.east {
                     Some(ref east) => {
-                        if let Some(_) = cell.linked(east.clone()) {
+                        if let Some(_) = cell.linked(east.upgrade().unwrap().clone()) {
                             top_str.push(' ');
                         } else {
                             top_str.push('|');
@@ -149,7 +153,7 @@ impl Debug for Grid {
 
                 match cell.south {
                     Some(ref south) => {
-                        if let Some(_) = cell.linked(south.clone()) {
+                        if let Some(_) = cell.linked(south.upgrade().unwrap().clone()) {
                             bottom_str.push_str("   ");
                         } else {
                             bottom_str.push_str("---");
