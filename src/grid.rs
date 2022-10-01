@@ -71,40 +71,36 @@ impl Grid {
                 let cell = cell.borrow();
                 println!("row: {}, column: {}", cell.row, cell.column);
 
-                let north = &cell.north;
+                let north = &cell.north();
                 match north {
                     Some(north) => {
-                        let north = north.upgrade().unwrap();
                         let north = north.borrow();
                         println!("north: row: {}, column: {}", north.row, north.column);
                     }
                     None => (),
                 }
 
-                let south = &cell.south;
+                let south = &cell.south();
                 match south {
                     Some(south) => {
-                        let south = south.upgrade().unwrap();
                         let south = south.borrow();
                         println!("south: row: {}, column: {}", south.row, south.column);
                     }
                     None => (),
                 }
 
-                let east = &cell.east;
+                let east = &cell.east();
                 match east {
                     Some(east) => {
-                        let east = east.upgrade().unwrap();
                         let east = east.borrow();
                         println!("east: row: {}, column: {}", east.row, east.column);
                     }
                     None => (),
                 }
 
-                let west = &cell.west;
+                let west = &cell.west();
                 match west {
                     Some(west) => {
-                        let west = west.upgrade().unwrap();
                         let west = west.borrow();
                         println!("west: row: {}, column: {}", west.row, west.column);
                     }
@@ -140,9 +136,9 @@ impl Debug for Grid {
             for cell in row {
                 let cell = &cell.borrow();
                 top_str.push_str("   ");
-                match cell.east {
-                    Some(ref east) => {
-                        if let Some(_) = cell.linked(east.upgrade().unwrap().clone()) {
+                match cell.east() {
+                    Some(east) => {
+                        if cell.linked(east).is_some() {
                             top_str.push(' ');
                         } else {
                             top_str.push('|');
@@ -151,9 +147,9 @@ impl Debug for Grid {
                     None => top_str.push('|'),
                 }
 
-                match cell.south {
-                    Some(ref south) => {
-                        if let Some(_) = cell.linked(south.upgrade().unwrap().clone()) {
+                match cell.south() {
+                    Some(south) => {
+                        if cell.linked(south).is_some() {
                             bottom_str.push_str("   ");
                         } else {
                             bottom_str.push_str("---");

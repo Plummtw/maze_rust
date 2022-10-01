@@ -18,16 +18,20 @@ pub fn on(grid: &mut Grid) {
 
             if should_close_out {
                 let member = run[rng.gen_range(0..run.len())].clone();
-                if member.borrow().north.is_some() {
-                    let cell2 = { 
-                        member.borrow().north.clone().upgrade().unwrap()
-                    };
-                    link(member.clone(), cell2);
-                    run.clear();
+                let north = member.borrow().north();
+                match north {
+                    Some(cell2) => {
+                        link(member.clone(), cell2);
+                        run.clear();
+                    },
+                    None => (),
                 }
             } else {
-                let cell2: CellLink = { cell.borrow().east.clone().upgrade().unwrap() };
-                link(cell.clone(), cell2);
+                let east = cell.borrow().east();
+                match east {
+                    Some(cell2) => link(cell.clone(), cell2),
+                    None => (),
+                }
             }
         }
     }

@@ -13,15 +13,15 @@ pub fn on(grid: &mut Grid) {
             {
                 let cell_borrowed = cell.borrow();
 
-                if let Some(ref north) = cell_borrowed.north {
-                    neighbors.push(north.upgrade().unwrap().clone());
+                if let Some(north) = cell_borrowed.north() {
+                    neighbors.push(north);
                 }
-                if let Some(ref east) = cell_borrowed.east {
-                    neighbors.push(east.upgrade().unwrap().clone());
+                if let Some(east) = cell_borrowed.east() {
+                    neighbors.push(east);
                 }
             }
 
-            if neighbors.len() > 0 {
+            if !neighbors.is_empty() {
                 let index = rng.gen_range(0..neighbors.len());
 
                 link(cell.clone(), neighbors[index].clone());

@@ -1,5 +1,8 @@
 #![allow(dead_code)]
-use std::{cell::RefCell, rc::{Rc, Weak}};
+use std::{
+    cell::RefCell,
+    rc::{Rc, Weak},
+};
 
 pub type CellLink = Rc<RefCell<Cell>>;
 pub type WeakCellLink = Weak<RefCell<Cell>>;
@@ -33,7 +36,6 @@ impl Upgradable<Option<CellLink>> for Option<WeakCellLink> {
     }
 }
 
-
 #[derive(Debug, Clone)]
 pub struct Cell {
     pub row: usize,
@@ -64,29 +66,46 @@ impl Cell {
         }
     }
 
+    pub fn north(&self) -> Option<CellLink> {
+        self.north.clone().upgrade()
+    }
+
+    pub fn south(&self) -> Option<CellLink> {
+        self.south.clone().upgrade()
+    }
+
+    pub fn east(&self) -> Option<CellLink> {
+        self.east.clone().upgrade()
+    }
+
+    pub fn west(&self) -> Option<CellLink> {
+        self.west.clone().upgrade()
+    }
+
     pub fn linked(&self, cell: CellLink) -> Option<CellLink> {
-        let result = self.links.iter().find(|v|
-            *v.upgrade().unwrap().borrow() == *cell.borrow()
-        );
+        let result = self.links.iter().find(|v| match v.upgrade() {
+            Some(v) => *v.borrow() == *cell.borrow(),
+            None => false,
+        });
         match result {
-            Some(x)  => x.upgrade(),
+            Some(x) => x.upgrade(),
             None => None,
         }
     }
 
     pub fn neighbors(&self) -> Vec<CellLink> {
         let mut result: Vec<CellLink> = Vec::new();
-        if let Some(ref cell) = self.north {
-            result.push(cell.upgrade().unwrap());
+        if let Some(cell) = self.north() {
+            result.push(cell);
         }
-        if let Some(ref cell) = self.south {
-            result.push(cell.upgrade().unwrap());
+        if let Some(cell) = self.south() {
+            result.push(cell);
         }
-        if let Some(ref cell) = self.east {
-            result.push(cell.upgrade().unwrap());
+        if let Some(cell) = self.east() {
+            result.push(cell);
         }
-        if let Some(ref cell) = self.west {
-            result.push(cell.upgrade().unwrap());
+        if let Some(cell) = self.west() {
+            result.push(cell);
         }
         result
     }
@@ -99,11 +118,10 @@ pub fn link(cell1: CellLink, cell2: CellLink) {
 
 pub fn unlink(cell1: CellLink, cell2: CellLink) {
     let mut cell1_borrowed = cell1.borrow_mut();
-    match cell1_borrowed
-        .links
-        .iter()
-        .position(|v| *v.upgrade().unwrap().borrow() == *cell2.borrow())
-    {
+    match cell1_borrowed.links.iter().position(|v| match v.upgrade() {
+        Some(v) => *v.borrow() == *cell2.borrow(),
+        None => false,
+    }) {
         Some(index) => {
             cell1_borrowed.links.remove(index);
         }
@@ -111,11 +129,10 @@ pub fn unlink(cell1: CellLink, cell2: CellLink) {
     };
 
     let mut cell2_borrowed = cell2.borrow_mut();
-    match cell2_borrowed
-        .links
-        .iter()
-        .position(|v| *v.upgrade().unwrap().borrow() == *cell1.borrow())
-    {
+    match cell2_borrowed.links.iter().position(|v| match v.upgrade() {
+        Some(v) => *v.borrow() == *cell1.borrow(),
+        None => false,
+    }) {
         Some(index) => {
             cell2_borrowed.links.remove(index);
         }
