@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 use std::{
     cell::RefCell,
-    rc::{Rc, Weak},
+    rc::{Rc, Weak}, hash::Hash,
 };
 
 pub type CellLink = Rc<RefCell<Cell>>;
@@ -53,8 +53,20 @@ impl PartialEq for Cell {
     }
 }
 
+impl Hash for Cell {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.row.hash(state);
+        self.column.hash(state);
+    }
+}
+
+impl Eq for Cell {
+    fn assert_receiver_is_total_eq(&self) {
+    }
+}
+
 impl Cell {
-    pub fn initialize(row: usize, column: usize) -> Self {
+    pub fn new(row: usize, column: usize) -> Self {
         Cell {
             row,
             column,

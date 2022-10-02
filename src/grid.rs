@@ -5,21 +5,23 @@ use std::fmt::{Debug, Formatter};
 use std::{cell::RefCell, rc::Rc};
 
 use super::cell::*;
+use super::distance::*;
 
 pub struct Grid {
     pub rows: usize,
     pub columns: usize,
     pub grid: Vec<Vec<CellLink>>,
+    pub distance: Option<Distance>,
 }
 
 impl Grid {
-    pub fn initialize(rows: usize, columns: usize) -> Self {
+    pub fn new(rows: usize, columns: usize) -> Self {
         let mut grid = Vec::new();
 
         for row in 0..rows {
             let mut row_grid = Vec::new();
             for column in 0..columns {
-                row_grid.push(Rc::new(RefCell::new(Cell::initialize(row, column))));
+                row_grid.push(Rc::new(RefCell::new(Cell::new(row, column))));
             }
             grid.push(row_grid);
         }
@@ -28,6 +30,7 @@ impl Grid {
             rows,
             columns,
             grid,
+            distance: None
         }
     }
 
@@ -55,6 +58,10 @@ impl Grid {
                 }
             }
         }
+    }
+
+    pub fn set_distance(&mut self, distance: Distance) {
+        self.distance = Some(distance);
     }
 
     pub fn get_cell(&self, row: usize, column: usize) -> Option<CellLink> {
@@ -134,11 +141,17 @@ impl Debug for Grid {
             let mut top_str = String::from("|");
             let mut bottom_str = String::from("+");
             for cell in row {
-                let cell = &cell.borrow();
-                top_str.push_str("   ");
-                match cell.east() {
+                let cell_borrowed = &cell.borrow();
+                top_str.push(' ');
+                let distance_str = match &self.distance {
+                    Some(distance) => distance_str(distance.get(cell.clone())),
+                    None => String::from(" "),
+                };
+                top_str.push_str(distance_str.as_str());
+                top_str.push(' ');
+                match cell_borrowed.east() {
                     Some(east) => {
-                        if cell.linked(east).is_some() {
+                        if cell_borrowed.linked(east).is_some() {
                             top_str.push(' ');
                         } else {
                             top_str.push('|');
@@ -147,9 +160,9 @@ impl Debug for Grid {
                     None => top_str.push('|'),
                 }
 
-                match cell.south() {
+                match cell_borrowed.south() {
                     Some(south) => {
-                        if cell.linked(south).is_some() {
+                        if cell_borrowed.linked(south).is_some() {
                             bottom_str.push_str("   ");
                         } else {
                             bottom_str.push_str("---");
