@@ -6,6 +6,7 @@ mod grid;
 mod sidewinder;
 mod distance;
 mod recursive_backtracker;
+mod kruskal;
 
 fn main() {
     println!("Hello, world!");
@@ -21,7 +22,8 @@ fn main() {
     // grid.configure_cells();
 
     // sidewinder::on(&mut grid);
-    recursive_backtracker::on(&mut grid);
+    // recursive_backtracker::on(&mut grid);
+    kruskal::on(&mut grid);
     println!("{:?}", grid);
 
     let distance = Distance::distances(grid.get_cell(0, 0).unwrap());
