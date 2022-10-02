@@ -7,17 +7,15 @@ use rand::Rng;
 pub fn on(grid: &mut Grid) {
     let mut rng = rand::thread_rng();
     let mut stack: Vec<CellLink> = Vec::with_capacity(grid.size());
-    stack.push(grid.get_cell(0, 0).unwrap().clone());
+    stack.push(grid.get_cell(0, 0).unwrap());
 
-    loop {
-        let current: CellLink; 
-        { 
-          current = match stack.last() {
-            Some(v) => v.clone(),
-            None => break,
-          }
-        };
-        
+    while let Some(current) = stack.last() {
+    // loop {
+    //     let current = match stack.last() {
+    //       Some(v) => v.clone(),
+    //       None => break,
+    //     };
+      
         let neighbors = {
           let cell_borrowed = current.borrow();
           let neighbors = cell_borrowed

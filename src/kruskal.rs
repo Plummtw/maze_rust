@@ -41,23 +41,17 @@ pub struct KruskalNode {
 
 impl KruskalNode {
     pub fn root(&self) -> (usize, usize) {
-        match &self.parent {
-            Some(parent) => {
-                let mut current = parent.upgrade();
-                loop {
-                    match current {
-                        Some(current_node) => {
-                            let current_borrow = current_node.borrow();
-                            if current_borrow.parent.is_none() {
-                                return (current_borrow.row, current_borrow.column);
-                            }
-                            current = (&current_node.borrow().parent).clone().upgrade();
-                        }
-                        None => panic!("root error"),
+        let mut current = self.clone();
+        loop {
+            match current.parent.clone() {
+                Some(parent) => match parent.upgrade() {
+                    Some(next_current) => {
+                        current = next_current.borrow().clone();
                     }
-                }
+                    None => panic!("root error"),
+                },
+                None => return (current.row, current.column),
             }
-            None => (self.row, self.column),
         }
     }
 }
@@ -76,9 +70,9 @@ pub struct KruskalEdge {
 }
 
 impl KruskalEdge {
-    pub fn find_node(&self, links: &Vec<KruskalLink>) -> Option<(KruskalLink, KruskalLink)> {
+    pub fn find_node(&self, links: &[KruskalLink]) -> Option<(KruskalLink, KruskalLink)> {
         let node1 = links.iter().find(|v| {
-            let cell = v.borrow().clone();
+            let cell = v.borrow();
             cell.row == self.row && cell.column == self.column
         });
 
@@ -155,11 +149,13 @@ pub fn on(grid: &mut Grid) {
     // Create Kruskal Structure
     let mut kruskal = Kruskal::new(grid);
 
-    loop {
-        let current = match kruskal.edges.pop() {
-            Some(v) => v,
-            None => break,
-        };
+    while let Some(current) = kruskal.edges.pop() {
+
+    // loop {
+    //     let current = match kruskal.edges.pop() {
+    //         Some(v) => v,
+    //         None => break,
+    //     };
 
         let find_result = current.find_node(&kruskal.nodes);
         match find_result {
@@ -177,17 +173,14 @@ pub fn on(grid: &mut Grid) {
                             .unwrap(),
                     );
                 }
-                {
-                    let node1_root = { node1.borrow().root() };
-                    let node1_root_borrow = kruskal
-                        .nodes
-                        .iter()
-                        .find(|v| {
-                            v.borrow().row == node1_root.0 && v.borrow().column == node1_root.1
-                        })
-                        .unwrap();
-                    node1_root_borrow.borrow_mut().parent = Some(node2.clone().downgrade());
-                }
+
+                let node1_root = { node1.borrow().root() };
+                let node1_root_borrow = kruskal
+                    .nodes
+                    .iter()
+                    .find(|v| v.borrow().row == node1_root.0 && v.borrow().column == node1_root.1)
+                    .unwrap();
+                node1_root_borrow.borrow_mut().parent = Some(node2.downgrade());
             }
             None => (),
         }

@@ -16,7 +16,7 @@ impl Distance {
     }
 
     pub fn get(&self, cell: CellLink) -> Option<usize> {
-        self.cells.get(&*cell.borrow()).map(|v| *v)
+        self.cells.get(&*cell.borrow()).copied()
     }
 
     pub fn set(&mut self, cell: CellLink, distance: usize) {
@@ -79,10 +79,7 @@ impl Distance {
                     Some(neighbor) => neighbor,
                     None => continue,
                 };
-                let distance_neighbor = match self.get(neighbor.clone()) {
-                    Some(distance) => distance,
-                    None => 0,
-                };
+                let distance_neighbor = self.get(neighbor.clone()).unwrap_or(0);
                 if distance_neighbor < distance {
                     breadcomb.set(neighbor.clone(), distance_neighbor);
                     distance = distance_neighbor;
